@@ -43,7 +43,7 @@ from .models import Bucket, MultipartObject, ObjectVersion, Part
 from .proxies import current_files_rest, current_permission_factory
 from .serializer import json_serializer
 from .signals import file_downloaded
-from .signals import file_previewed
+# from .signals import file_previewed
 from .tasks import merge_multipartobject, remove_file_data
 
 blueprint = Blueprint(
