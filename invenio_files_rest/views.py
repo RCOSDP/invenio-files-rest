@@ -612,10 +612,10 @@ class ObjectResource(ContentNegotiatedMethodView):
             current_app.logger.warning(
                 'File checksum mismatch detected.', extra=logger_data)
 
-        if is_preview:
-            file_previewed.send(current_app._get_current_object(), obj=obj)
-        else:
-            file_downloaded.send(current_app._get_current_object(), obj=obj)
+        # if is_preview:
+        #     file_previewed.send(current_app._get_current_object(), obj=obj)
+        # else:
+        file_downloaded.send(current_app._get_current_object(), obj=obj)
         return obj.send_file(restricted=restricted,
                              as_attachment=as_attachment)
 
