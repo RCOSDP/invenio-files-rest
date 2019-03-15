@@ -1005,6 +1005,17 @@ class ObjectVersion(db.Model, Timestamp):
         :param chunk_size: Desired chunk size to read stream in. It is up to
             the storage interface if it respects this value.
         """
+        def print_trackback():
+            try:
+                import traceback
+                for line in traceback.format_stack():
+                    print(line.strip())
+            except Exception:
+                print("warning")
+        
+        print("[Log]: create >> print_trackback()")
+        print_trackback()
+        
         if size_limit is None:
             size_limit = self.bucket.size_limit
 
@@ -1015,7 +1026,8 @@ class ObjectVersion(db.Model, Timestamp):
             default_location=self.bucket.location.uri,
             default_storage_class=self.bucket.default_storage_class,
         )
-
+        print("[Log]: set_contents >> self.file")
+        print(self.file)
         return self
 
     @ensure_no_file()
@@ -1121,6 +1133,16 @@ class ObjectVersion(db.Model, Timestamp):
     @classmethod
     def create(cls, bucket, key, _file_id=None, stream=None, mimetype=None,
                version_id=None, **kwargs):
+        def print_trackback():
+            try:
+                import traceback
+                for line in traceback.format_stack():
+                    print(line.strip())
+            except Exception:
+                print("warning")
+        
+        print("[Log]: create >> print_trackback()")
+        print_trackback()
         """Create a new object in a bucket.
 
         The created object is by default created as a delete marker. You must
@@ -1143,6 +1165,10 @@ class ObjectVersion(db.Model, Timestamp):
             latest_obj = cls.query.filter(
                 cls.bucket == bucket, cls.key == key, cls.is_head.is_(True)
             ).one_or_none()
+            
+            print("[Log]: create >> latest_obj")
+            print(latest_obj)
+        
             if latest_obj is not None:
                 latest_obj.is_head = False
                 db.session.add(latest_obj)
@@ -1160,6 +1186,10 @@ class ObjectVersion(db.Model, Timestamp):
                 file_ = _file_id if isinstance(_file_id, FileInstance) else \
                     FileInstance.get(_file_id)
                 obj.set_file(file_)
+                
+                print("[Log]: create >> obj")
+                print(obj)
+                
             db.session.add(obj)
         if stream:
             obj.set_contents(stream, **kwargs)
