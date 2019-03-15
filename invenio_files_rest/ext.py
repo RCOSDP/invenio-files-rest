@@ -43,6 +43,12 @@ class _FilesRESTState(object):
         """Initialize state."""
         self.app = app
 
+    def upload_file_owner_factory(self):
+        """Load default upload file owner factory."""
+        return load_or_import_from_config(
+            'FILES_REST_UPLOAD_OWNER_FACTORIES', app=self.app
+        )
+        
     @cached_property
     def storage_factory(self):
         """Load default storage factory."""

@@ -32,7 +32,7 @@ from marshmallow import Schema, fields, missing, post_dump
 
 from .errors import FilesException
 from .models import Bucket, MultipartObject, ObjectVersion, Part
-
+from .proxies import current_files_rest
 
 class BaseSchema(Schema):
     """Base schema for all serializations."""
@@ -82,7 +82,7 @@ class ObjectVersionSchema(BaseSchema):
     
     def get_upload_owners():
         """ get upload owner information. """
-        return current_app.config['FILES_REST_UPLOAD_OWNER_FACTORIES'](self.created_user_id, self.updated_user_id)
+        return current_files_rest.upload_file_owner_factory(self.created_user_id, self.updated_user_id)
         
     def dump_links(self, o):
         """Dump links."""
