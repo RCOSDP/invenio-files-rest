@@ -1179,11 +1179,10 @@ class ObjectVersion(db.Model, Timestamp):
             
             print("[Log]: create >> latest_obj")
             print(latest_obj)
-            
-            # set updated user id.
-            latest_obj.updated_user_id = login_user_id
-            
+                        
             if latest_obj is not None:
+                # set updated user id.
+                latest_obj.updated_user_id = login_user_id
                 latest_obj.is_head = False
                 db.session.add(latest_obj)
 
