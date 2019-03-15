@@ -82,7 +82,7 @@ class ObjectVersionSchema(BaseSchema):
     
     def upload_owners(self, o):
         """ get upload owner information. """
-        return current_files_rest.upload_file_owner_factory(self.created_user_id, self.updated_user_id)
+        return current_files_rest.upload_file_owner_factory(1, 1)
         
     def dump_links(self, o):
         """Dump links."""
