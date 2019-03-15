@@ -82,10 +82,7 @@ class ObjectVersionSchema(BaseSchema):
     
     def upload_owners(self, o):
         """ get upload owner information. """
-        print("[Log]: upload_owners >> self")
-        print(self.created_user_id)
-        print(self.updated_user_id)
-        
+        print("[Log]: upload_owners >> self")        
         print("[Log]: upload_owners >> o")
         print(o.created_user_id)
         print(o.updated_user_id)
