@@ -142,9 +142,7 @@ def ensure_state(default_getter, exc_class, default_msg=None):
     print("[Log]: ensure_state >> default_msg")
     print(default_msg)
     print_trackback()
-	
-    """Create a decorator facto
-	ry function."""
+    """Create a decorator factory function."""
     def decorator(getter=default_getter, msg=default_msg):
         def ensure_decorator(f):
             @wraps(f)
@@ -154,9 +152,9 @@ def ensure_state(default_getter, exc_class, default_msg=None):
                 return f(self, *args, **kwargs)
             return inner
         return ensure_decorator
-		
-	print("[Log]: end ensure_state")
-	
+    
+    print("[Log]: end ensure_state")
+    
     return decorator
 
 
