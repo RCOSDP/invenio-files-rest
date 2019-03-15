@@ -126,9 +126,25 @@ def update_bucket_size(f):
         return res
     return inner
 
-
+def print_trackback():
+	try:
+		import traceback
+		for line in traceback.format_stack():
+			print(line.strip())
+	except Exception:
+		print("warning")
 def ensure_state(default_getter, exc_class, default_msg=None):
-    """Create a decorator factory function."""
+	print("[Log]: start ensure_state")
+	print("[Log]: ensure_state >> default_getter")
+	print(default_getter)
+	print("[Log]: ensure_state >> exc_class")
+	print(exc_class)
+	print("[Log]: ensure_state >> default_msg")
+	print(default_msg)
+	print_trackback()
+	
+    """Create a decorator facto
+	ry function."""
     def decorator(getter=default_getter, msg=default_msg):
         def ensure_decorator(f):
             @wraps(f)
@@ -138,6 +154,9 @@ def ensure_state(default_getter, exc_class, default_msg=None):
                 return f(self, *args, **kwargs)
             return inner
         return ensure_decorator
+		
+	print("[Log]: end ensure_state")
+	
     return decorator
 
 
