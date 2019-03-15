@@ -61,6 +61,7 @@ from os.path import basename
 
 import six
 from flask import current_app
+from flask_login import current_user
 from invenio_db import db
 from sqlalchemy.dialects import mysql, postgresql
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -126,8 +127,22 @@ def update_bucket_size(f):
         return res
     return inner
 
-
+def print_trackback():
+    try:
+        import traceback
+        for line in traceback.format_stack():
+            print(line.strip())
+    except Exception:
+        print("warning")
 def ensure_state(default_getter, exc_class, default_msg=None):
+    print("[Log]: start ensure_state")
+    print("[Log]: ensure_state >> default_getter")
+    print(default_getter)
+    print("[Log]: ensure_state >> exc_class")
+    print(exc_class)
+    print("[Log]: ensure_state >> default_msg")
+    print(default_msg)
+    print_trackback()
     """Create a decorator factory function."""
     def decorator(getter=default_getter, msg=default_msg):
         def ensure_decorator(f):
@@ -138,6 +153,9 @@ def ensure_state(default_getter, exc_class, default_msg=None):
                 return f(self, *args, **kwargs)
             return inner
         return ensure_decorator
+    
+    print("[Log]: end ensure_state")
+    
     return decorator
 
 
@@ -933,6 +951,12 @@ class ObjectVersion(db.Model, Timestamp):
                         default=True)
     """Defines if object is the latest version."""
 
+    created_user_id = db.Column(db.Integer, nullable=True, default=0)
+    """created user id of uploading."""
+    
+    updated_user_id = db.Column(db.Integer, nullable=True, default=0)
+    """updated user id of uploading."""
+    
     # Relationships definitions
     bucket = db.relationship(Bucket, backref='objects')
     """Relationship to buckets."""
@@ -988,6 +1012,17 @@ class ObjectVersion(db.Model, Timestamp):
         :param chunk_size: Desired chunk size to read stream in. It is up to
             the storage interface if it respects this value.
         """
+        def print_trackback():
+            try:
+                import traceback
+                for line in traceback.format_stack():
+                    print(line.strip())
+            except Exception:
+                print("warning")
+        
+        print("[Log]: create >> print_trackback()")
+        print_trackback()
+        
         if size_limit is None:
             size_limit = self.bucket.size_limit
 
@@ -998,7 +1033,8 @@ class ObjectVersion(db.Model, Timestamp):
             default_location=self.bucket.location.uri,
             default_storage_class=self.bucket.default_storage_class,
         )
-
+        print("[Log]: set_contents >> self.file")
+        print(self.file)
         return self
 
     @ensure_no_file()
@@ -1104,6 +1140,16 @@ class ObjectVersion(db.Model, Timestamp):
     @classmethod
     def create(cls, bucket, key, _file_id=None, stream=None, mimetype=None,
                version_id=None, **kwargs):
+        def print_trackback():
+            try:
+                import traceback
+                for line in traceback.format_stack():
+                    print(line.strip())
+            except Exception:
+                print("warning")
+        
+        print("[Log]: create >> print_trackback()")
+        print_trackback()
         """Create a new object in a bucket.
 
         The created object is by default created as a delete marker. You must
@@ -1126,7 +1172,17 @@ class ObjectVersion(db.Model, Timestamp):
             latest_obj = cls.query.filter(
                 cls.bucket == bucket, cls.key == key, cls.is_head.is_(True)
             ).one_or_none()
+            
+            login_user_id = 0
+            if current_user.is_authenticated:
+                login_user_id = current_user.get_id()
+            
+            print("[Log]: create >> latest_obj")
+            print(latest_obj)
+                        
             if latest_obj is not None:
+                # set updated user id.
+                latest_obj.updated_user_id = login_user_id
                 latest_obj.is_head = False
                 db.session.add(latest_obj)
 
@@ -1138,11 +1194,17 @@ class ObjectVersion(db.Model, Timestamp):
                 version_id=version_id or uuid.uuid4(),
                 is_head=True,
                 mimetype=mimetype,
+                created_user_id = login_user_id,
+                updated_user_id = login_user_id,
             )
             if _file_id:
                 file_ = _file_id if isinstance(_file_id, FileInstance) else \
                     FileInstance.get(_file_id)
                 obj.set_file(file_)
+                
+                print("[Log]: create >> obj")
+                print(obj)
+                
             db.session.add(obj)
         if stream:
             obj.set_contents(stream, **kwargs)
