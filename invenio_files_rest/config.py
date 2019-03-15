@@ -138,3 +138,4 @@ FILES_REST_LOCATION_TYPE_LIST = [('s3', 'Amazon S3')]
 """Location type list"""
 
 FILES_REST_UPLOAD_OWNER_FACTORIES = 'invenio_files_rest.serializer.file_uploaded_owner'
+"""file update version"""

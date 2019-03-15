@@ -91,7 +91,7 @@ class ObjectVersionSchema(BaseSchema):
         print("[Log]: upload_func")
         print(upload_func)
         
-        return upload_func(1, 1)
+        return upload_func(o.created_user_id, o.updated_user_id)
         
     def dump_links(self, o):
         """Dump links."""
@@ -357,10 +357,16 @@ def file_uploaded_owner(created_user_id = 0, updated_user_id = 0):
     print(updated_user_id)
     
     return {
-        'created_user_id' : created_user_id,
-        'created_username' : '',
-        'created_displayname' : '',
-        'updated_user_id' : updated_user_id,
-        'updated_username' : '',
-        'updated_displayname' : '',
+        'created_user': {
+            'user_id' : created_user_id,
+            'username' : '',
+            'displayname' : '',
+            'email' : '',
+        },
+        'updated_user': {
+            'user_id' : updated_user_id,
+            'username' : '',
+            'displayname' : '',
+            'email' : '',
+        }
     }
