@@ -127,21 +127,21 @@ def update_bucket_size(f):
     return inner
 
 def print_trackback():
-	try:
-		import traceback
-		for line in traceback.format_stack():
-			print(line.strip())
-	except Exception:
-		print("warning")
+    try:
+        import traceback
+        for line in traceback.format_stack():
+            print(line.strip())
+    except Exception:
+        print("warning")
 def ensure_state(default_getter, exc_class, default_msg=None):
-	print("[Log]: start ensure_state")
-	print("[Log]: ensure_state >> default_getter")
-	print(default_getter)
-	print("[Log]: ensure_state >> exc_class")
-	print(exc_class)
-	print("[Log]: ensure_state >> default_msg")
-	print(default_msg)
-	print_trackback()
+    print("[Log]: start ensure_state")
+    print("[Log]: ensure_state >> default_getter")
+    print(default_getter)
+    print("[Log]: ensure_state >> exc_class")
+    print(exc_class)
+    print("[Log]: ensure_state >> default_msg")
+    print(default_msg)
+    print_trackback()
 	
     """Create a decorator facto
 	ry function."""
