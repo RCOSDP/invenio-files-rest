@@ -82,9 +82,13 @@ class ObjectVersionSchema(BaseSchema):
     
     def upload_owners(self, o):
         """ get upload owner information. """
-        print("[Log]: upload_owners")
+        print("[Log]: upload_owners >> self")
         print(self.created_user_id)
         print(self.updated_user_id)
+        
+        print("[Log]: upload_owners >> o")
+        print(o.created_user_id)
+        print(o.updated_user_id)
         
         upload_func = current_files_rest.upload_file_owner_factory()
         print("[Log]: upload_func")
