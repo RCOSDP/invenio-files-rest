@@ -78,9 +78,9 @@ class ObjectVersionSchema(BaseSchema):
     delete_marker = fields.Boolean(attribute='deleted')
     created_user_id = fields.Integer()
     updated_user_id = fields.Integer()
-    uploaded_owners = fields.Method('get_upload_owners')
+    uploaded_owners = fields.Method('upload_owners')
     
-    def get_upload_owners():
+    def upload_owners(self):
         """ get upload owner information. """
         return current_files_rest.upload_file_owner_factory(self.created_user_id, self.updated_user_id)
         
