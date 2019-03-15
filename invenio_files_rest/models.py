@@ -61,6 +61,7 @@ from os.path import basename
 
 import six
 from flask import current_app
+from flask_login import current_user
 from invenio_db import db
 from sqlalchemy.dialects import mysql, postgresql
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -950,6 +951,12 @@ class ObjectVersion(db.Model, Timestamp):
                         default=True)
     """Defines if object is the latest version."""
 
+    created_user_id = db.Column(db.Integer, nullable=True, default=0)
+    """created user id of uploading."""
+    
+    updated_user_id = db.Column(db.Integer, nullable=True, default=0)
+    """updated user id of uploading."""
+    
     # Relationships definitions
     bucket = db.relationship(Bucket, backref='objects')
     """Relationship to buckets."""
@@ -1166,9 +1173,16 @@ class ObjectVersion(db.Model, Timestamp):
                 cls.bucket == bucket, cls.key == key, cls.is_head.is_(True)
             ).one_or_none()
             
+            login_user_id = 0
+            if current_user.is_authenticated:
+                login_user_id = current_user.get_id()
+            
             print("[Log]: create >> latest_obj")
             print(latest_obj)
-        
+            
+            # set updated user id.
+            latest_obj.updated_user_id = login_user_id
+            
             if latest_obj is not None:
                 latest_obj.is_head = False
                 db.session.add(latest_obj)
@@ -1181,6 +1195,8 @@ class ObjectVersion(db.Model, Timestamp):
                 version_id=version_id or uuid.uuid4(),
                 is_head=True,
                 mimetype=mimetype,
+                created_user_id = login_user_id,
+                updated_user_id = login_user_id,
             )
             if _file_id:
                 file_ = _file_id if isinstance(_file_id, FileInstance) else \

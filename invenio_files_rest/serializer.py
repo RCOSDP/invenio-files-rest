@@ -76,6 +76,8 @@ class ObjectVersionSchema(BaseSchema):
     size = fields.Integer(attribute='file.size')
     checksum = fields.String(attribute='file.checksum')
     delete_marker = fields.Boolean(attribute='deleted')
+    created_user_id = fields.Integer()
+    updated_user_id = fields.Integer()
 
     def dump_links(self, o):
         """Dump links."""
