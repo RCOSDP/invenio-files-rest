@@ -81,15 +81,8 @@ class ObjectVersionSchema(BaseSchema):
     uploaded_owners = fields.Method('upload_owners', dump_only=True)
     
     def upload_owners(self, o):
-        """ get upload owner information. """
-        print("[Log]: upload_owners >> self")        
-        print("[Log]: upload_owners >> o")
-        print(o.created_user_id)
-        print(o.updated_user_id)
-        
+        """ get upload owner information. """        
         upload_func = current_files_rest.upload_file_owner_factory()
-        print("[Log]: upload_func")
-        print(upload_func)
         
         return upload_func(o.created_user_id, o.updated_user_id)
         
@@ -351,22 +344,16 @@ def file_uploaded_owner(created_user_id = 0, updated_user_id = 0):
     :param created_user_id: The created user id. (Default: ``0``)
     :param updated_user_id: The updated user id. (Default: ``0``)
     :returns: A response with json data.
-    """
-    print("[Log]: file_uploaded_owner >> created_user_id, updated_user_id")
-    print(created_user_id)
-    print(updated_user_id)
-    
+    """    
     return {
         'created_user': {
             'user_id' : created_user_id,
             'username' : '',
             'displayname' : '',
-            'email' : '',
         },
         'updated_user': {
             'user_id' : updated_user_id,
             'username' : '',
             'displayname' : '',
-            'email' : '',
         }
     }

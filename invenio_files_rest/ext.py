@@ -45,7 +45,6 @@ class _FilesRESTState(object):
 
     def upload_file_owner_factory(self):
         """Load default upload file owner factory."""
-        print("[Log]: upload_file_owner_factory")
         return load_or_import_from_config(
             'FILES_REST_UPLOAD_OWNER_FACTORIES', app=self.app
         )
