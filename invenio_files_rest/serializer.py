@@ -32,7 +32,7 @@ from marshmallow import Schema, fields, missing, post_dump
 
 from .errors import FilesException
 from .models import Bucket, MultipartObject, ObjectVersion, Part
-
+from .proxies import current_files_rest
 
 class BaseSchema(Schema):
     """Base schema for all serializations."""
@@ -76,6 +76,15 @@ class ObjectVersionSchema(BaseSchema):
     size = fields.Integer(attribute='file.size')
     checksum = fields.String(attribute='file.checksum')
     delete_marker = fields.Boolean(attribute='deleted')
+    created_user_id = fields.Integer()
+    updated_user_id = fields.Integer()
+    uploaded_owners = fields.Method('upload_owners', dump_only=True)
+
+    def upload_owners(self, o):
+        """ get upload owner information. """
+        upload_func = current_files_rest.upload_file_owner_factory()
+
+        return upload_func(o.created_user_id, o.updated_user_id)
 
     def dump_links(self, o):
         """Dump links."""
@@ -328,3 +337,23 @@ def json_serializer(data=None, code=200, headers=None, context=None,
         response.set_etag(etag)
 
     return response
+
+def file_uploaded_owner(created_user_id = 0, updated_user_id = 0):
+    """Build upload file owners.
+
+    :param created_user_id: The created user id. (Default: ``0``)
+    :param updated_user_id: The updated user id. (Default: ``0``)
+    :returns: A response with json data.
+    """
+    return {
+        'created_user': {
+            'user_id' : created_user_id,
+            'username' : '',
+            'displayname' : '',
+        },
+        'updated_user': {
+            'user_id' : updated_user_id,
+            'username' : '',
+            'displayname' : '',
+        }
+    }

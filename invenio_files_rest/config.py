@@ -109,6 +109,7 @@ FILES_REST_UPLOAD_FACTORIES = [
 ]
 """Import path of factory used to parse file uploads.
 
+
 .. note::
 
    Factories that reads ``request.stream`` directly must be first in the list,
@@ -135,3 +136,6 @@ FILES_REST_TASK_WAIT_MAX_SECONDS = 600
 
 FILES_REST_LOCATION_TYPE_LIST = [('s3', 'Amazon S3')]
 """Location type list"""
+
+FILES_REST_UPLOAD_OWNER_FACTORIES = 'invenio_files_rest.serializer.file_uploaded_owner'
+"""file update version"""
