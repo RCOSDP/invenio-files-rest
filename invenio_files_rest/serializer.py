@@ -79,6 +79,7 @@ class ObjectVersionSchema(BaseSchema):
     created_user_id = fields.Integer()
     updated_user_id = fields.Integer()
     uploaded_owners = fields.Method('upload_owners', dump_only=True)
+    is_show = fields.Boolean()
 
     def upload_owners(self, o):
         """ get upload owner information. """

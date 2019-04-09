@@ -947,6 +947,10 @@ class ObjectVersion(db.Model, Timestamp):
     file = db.relationship(FileInstance, backref='objects')
     """Relationship to file instance."""
 
+    is_show = db.Column(db.Boolean(name='is_show'),
+                        nullable=False,
+                        default=False)
+
     @validates('key')
     def validate_key(self, key, key_):
         """Validate key."""
@@ -1154,6 +1158,7 @@ class ObjectVersion(db.Model, Timestamp):
                 mimetype=mimetype,
                 created_user_id = login_user_id,
                 updated_user_id = login_user_id,
+                is_show=False,
             )
             if _file_id:
                 file_ = _file_id if isinstance(_file_id, FileInstance) else \
