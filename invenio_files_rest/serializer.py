@@ -90,30 +90,40 @@ class ObjectVersionSchema(BaseSchema):
     def dump_links(self, o):
         """Dump links."""
         params = {'versionId': o.version_id}
-        data = {
-            'self': url_for(
-                '.object_api',
-                bucket_id=o.bucket_id,
-                key=o.key,
-                _external=True,
-                **(params if not o.is_head or o.deleted else {})
-            ),
-            'version': url_for(
-                '.object_api',
-                bucket_id=o.bucket_id,
-                key=o.key,
-                _external=True,
-                **params
-            )
-        }
 
-        if o.is_head and not o.deleted:
-            data.update({'uploads': url_for(
-                '.object_api',
-                bucket_id=o.bucket_id,
-                key=o.key,
-                _external=True
-            ) + '?uploads', })
+        # If guest and objectVersion is not head and the flag is_show is False then do display the links
+        from flask_login import current_user
+        if not o.is_head and not o.is_show and (current_user is None or not current_user.is_authenticated):
+            data = {
+                'self': '',
+                'version': '',
+                'uploads': '',
+            }
+        else:
+            data = {
+                'self': url_for(
+                    '.object_api',
+                    bucket_id=o.bucket_id,
+                    key=o.key,
+                    _external=True,
+                    **(params if not o.is_head or o.deleted else {})
+                ),
+                'version': url_for(
+                    '.object_api',
+                    bucket_id=o.bucket_id,
+                    key=o.key,
+                    _external=True,
+                    **params
+                )
+            }
+
+            if o.is_head and not o.deleted:
+                data.update({'uploads': url_for(
+                    '.object_api',
+                    bucket_id=o.bucket_id,
+                    key=o.key,
+                    _external=True
+                ) + '?uploads', })
 
         return data
 
