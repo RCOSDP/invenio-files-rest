@@ -91,9 +91,18 @@ class ObjectVersionSchema(BaseSchema):
         """Dump links."""
         params = {'versionId': o.version_id}
 
-        # If guest and objectVersion is not head and the flag is_show is False then do display the links
+        show_links = False
+
         from flask_login import current_user
-        if not o.is_head and not o.is_show and (current_user is None or not current_user.is_authenticated):
+        if o.is_head:
+            show_links = True
+        elif o.is_show:
+                show_links = True
+        elif current_user.is_authenticated:
+            from .permissions import has_update_version_role
+            show_links = has_update_version_role(current_user)
+
+        if not show_links:
             data = {
                 'self': '',
                 'version': '',

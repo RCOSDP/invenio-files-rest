@@ -24,6 +24,7 @@
 
 """Permissions for files using Invenio-Access."""
 
+import os
 from functools import partial
 
 from invenio_access.permissions import DynamicPermission, \
@@ -161,3 +162,22 @@ def permission_factory(obj, action):
         raise RuntimeError('Unknown object')
 
     return DynamicPermission(need_class(arg))
+
+
+def has_update_version_role(user):
+    """Check if user has the version update role when working on object_version.
+
+    :param user: User to check the role.
+    :return Boolean value.
+    """
+
+    if user is not None and user.is_authenticated:
+        roles_user = []
+        roles_env = ['INVENIO_ROLE_SYSTEM', 'INVENIO_ROLE_REPOSITORY', 'INVENIO_ROLE_CONTRIBUTOR']
+        for role_env in roles_env:
+            if role_env in os.environ:
+                        roles_user.append(os.environ.get(role_env))
+        for lst in list(user.roles or []):
+            if lst.name in roles_user:
+                return True
+    return False
