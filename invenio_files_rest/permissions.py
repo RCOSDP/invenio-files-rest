@@ -170,13 +170,15 @@ def has_update_version_role(user):
     :param user: User to check the role.
     :return Boolean value.
     """
-
     if user is not None and user.is_authenticated:
         roles_user = []
-        roles_env = ['INVENIO_ROLE_SYSTEM', 'INVENIO_ROLE_REPOSITORY', 'INVENIO_ROLE_COMMUNITY']
+        roles_env = [
+            'INVENIO_ROLE_SYSTEM',
+            'INVENIO_ROLE_REPOSITORY',
+            'INVENIO_ROLE_COMMUNITY']
         for role_env in roles_env:
             if role_env in os.environ:
-                        roles_user.append(os.environ.get(role_env))
+                roles_user.append(os.environ.get(role_env))
         for lst in list(user.roles or []):
             if lst.name in roles_user:
                 return True
