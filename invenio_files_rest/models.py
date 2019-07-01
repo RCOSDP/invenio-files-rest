@@ -124,6 +124,7 @@ def update_bucket_size(f):
     def inner(self, *args, **kwargs):
         res = f(self, *args, **kwargs)
         self.bucket.size += self.file.size
+        self.bucket.location.size += self.file.size
         return res
     return inner
 
@@ -275,9 +276,9 @@ class Location(db.Model, Timestamp):
 
     secret_key = db.Column(db.String(128), nullable=True)
 
-    quota_size = db.Column(db.Integer, nullable=True)
+    size = db.Column(db.BigInteger, default=0, nullable=True)
 
-    max_file_size = db.Column(db.Integer, nullable=True)
+    quota_size = db.Column(db.BigInteger, nullable=True)
 
     @validates('name')
     def validate_name(self, key, name):

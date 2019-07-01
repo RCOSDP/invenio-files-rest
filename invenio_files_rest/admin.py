@@ -73,14 +73,15 @@ class LocationModelView(ModelView):
             'bucket.index_view', flt2_2=o.name))
     )
     column_details_list = (
-        'type', 'name', 'uri', 'default', 'created', 'updated', 'buckets',
-        'quota_size')
+        'type', 'name', 'uri', 'default', 'size', 'quota_size',
+        'created', 'updated', 'buckets')
     column_list = (
-        'type', 'name', 'uri', 'default', 'created', 'updated', 'buckets',
-        'quota_size')
+        'type', 'name', 'uri', 'default', 'size', 'quota_size',
+        'created', 'updated', 'buckets')
     column_labels = dict(
         id=_('ID'),
         uri=_('URI'),
+        size=_('Size'),
         quota_size=_('Quota Size'),
         access_key=_('Access Key'),
         secret_key=_('Secret Key')
@@ -90,8 +91,8 @@ class LocationModelView(ModelView):
     column_default_sort = 'name'
     form_base_class = SecureForm
     form_columns = (
-        'name', 'uri', 'type', 'access_key', 'secret_key', 'quota_size',
-        'max_file_size', 'default')
+        'name', 'uri', 'type', 'access_key', 'secret_key',
+        'quota_size', 'default')
     form_choices = {
         'type' : LazyChoices(
             lambda: current_app.config['FILES_REST_LOCATION_TYPE_LIST'])
