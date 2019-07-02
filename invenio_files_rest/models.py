@@ -280,6 +280,8 @@ class Location(db.Model, Timestamp):
 
     quota_size = db.Column(db.BigInteger, nullable=True)
 
+    max_file_size = db.Column(db.BigInteger, nullable=True)
+
     @validates('name')
     def validate_name(self, key, name):
         """Validate name."""
