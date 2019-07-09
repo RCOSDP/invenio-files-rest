@@ -38,7 +38,9 @@ from celery.utils.log import get_task_logger
 from flask import current_app
 from invenio_db import db
 from sqlalchemy.exc import IntegrityError
+from weko_admin.models import AdminSettings
 
+from .api import send_alert_mail
 from .models import FileInstance, Location, MultipartObject, ObjectVersion
 from .utils import obj_or_import_string
 
@@ -281,3 +283,24 @@ def remove_expired_multipartobjects():
 
     for fid in file_ids:
         remove_file_data.delay(fid)
+
+
+@shared_task(ignore_result=True)
+def check_send_alert_mail():
+    """Check storage use rate and send alert mail by celery schedule."""
+    settings = AdminSettings.get('storage_check_settings')
+
+    if settings:
+        now = datetime.now()
+        locations = Location.all()
+        for l in locations:
+            if l.quota_size and l.quota_size > 0 \
+                    and l.size / l.quota_size * 100 >= settings.threshold_rate:
+                if (settings.cycle == 'daily') or \
+                        (settings.cycle == 'weekly'
+                         and settings.day == now.weekday()) \
+                        or (settings.cycle == 'monthly'
+                            and settings.day == now.day):
+                    send_alert_mail(settings.threshold_rate, l.name,
+                                    l.size / l.quota_size,
+                                    l.size, l.quota_size)
