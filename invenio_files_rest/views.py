@@ -42,8 +42,7 @@ from .errors import FileSizeError, MissingQueryParameter, \
 from .models import Bucket, MultipartObject, ObjectVersion, Part
 from .proxies import current_files_rest, current_permission_factory
 from .serializer import json_serializer
-from .signals import file_downloaded
-from .signals import file_previewed
+from .signals import file_downloaded, file_previewed
 from .tasks import merge_multipartobject, remove_file_data
 
 blueprint = Blueprint(
@@ -64,6 +63,8 @@ admin_blueprint = Blueprint(
 #
 # Helpers
 #
+
+
 def as_uuid(value):
     """Convert value to UUID."""
     try:
@@ -514,7 +515,6 @@ class ObjectResource(ContentNegotiatedMethodView):
 
         return obj
 
-
     def create_object(self, bucket, key):
         """Create a new object.
 
@@ -531,7 +531,7 @@ class ObjectResource(ContentNegotiatedMethodView):
 
         size_limit = bucket.size_limit
         location_limit = bucket.location.max_file_size
-        if location_limit != None:
+        if location_limit is not None:
             size_limit = min(size_limit, location_limit)
         if content_length and size_limit and content_length > size_limit:
             desc = 'File size limit exceeded.' \
@@ -589,8 +589,14 @@ class ObjectResource(ContentNegotiatedMethodView):
         return self.make_response('', 204)
 
     @staticmethod
-    def send_object(bucket, obj, expected_chksum=None,
-                    logger_data=None, restricted=True, as_attachment=False, is_preview=False):
+    def send_object(
+            bucket,
+            obj,
+            expected_chksum=None,
+            logger_data=None,
+            restricted=True,
+            as_attachment=False,
+            is_preview=False):
         """Send an object for a given bucket.
 
         :param is_preview: Determine the type of event. True: file-preview, False: file-download

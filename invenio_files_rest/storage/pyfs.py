@@ -26,9 +26,10 @@
 
 from __future__ import absolute_import, print_function
 
-import hashlib, base64
-import cchardet as chardet
+import base64
+import hashlib
 
+import cchardet as chardet
 from flask import current_app
 from fs.opener import opener
 from fs.path import basename, dirname
@@ -156,7 +157,7 @@ class PyFSFileStorage(FileStorage):
         return 'sha256', hashlib.sha256()
 
     def upload_file(self, fjson):
-        """"""
+        """Upload file."""
         if fjson is None or len(fjson) == 0:
             return
 
@@ -182,7 +183,7 @@ class PyFSFileStorage(FileStorage):
         fjson.update({"file": strb})
 
     def read_file(self, fjson):
-        """"""
+        """Read file."""
         if fjson is None or len(fjson) == 0:
             return
 

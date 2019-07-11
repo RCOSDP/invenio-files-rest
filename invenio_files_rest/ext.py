@@ -36,6 +36,7 @@ from .errors import MultipartNoPart
 from .utils import load_or_import_from_config, obj_or_import_string
 from .views import admin_blueprint
 
+
 class _FilesRESTState(object):
     """Invenio Files REST state."""
 
@@ -48,7 +49,7 @@ class _FilesRESTState(object):
         return load_or_import_from_config(
             'FILES_REST_UPLOAD_OWNER_FACTORIES', app=self.app
         )
-        
+
     @cached_property
     def storage_factory(self):
         """Load default storage factory."""

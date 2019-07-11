@@ -23,7 +23,7 @@ from __future__ import absolute_import, print_function
 
 import uuid
 
-from flask import current_app, flash, url_for, Blueprint
+from flask import Blueprint, current_app, flash, url_for
 from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.form import SecureForm
@@ -31,8 +31,8 @@ from flask_wtf import FlaskForm
 from invenio_admin.filters import FilterConverter
 from invenio_admin.forms import LazyChoices
 from markupsafe import Markup
-from wtforms.validators import ValidationError
 from wtforms.fields import PasswordField
+from wtforms.validators import ValidationError
 from wtforms.widgets import PasswordInput
 
 from .models import Bucket, FileInstance, Location, MultipartObject, \
@@ -94,14 +94,14 @@ class LocationModelView(ModelView):
         'name', 'uri', 'type', 'access_key', 'secret_key',
         'quota_size', 'default')
     form_choices = {
-        'type' : LazyChoices(
+        'type': LazyChoices(
             lambda: current_app.config['FILES_REST_LOCATION_TYPE_LIST'])
     }
     form_extra_fields = {
         'access_key': PasswordField('access_key',
-            widget=PasswordInput(hide_value=False)),
+                                    widget=PasswordInput(hide_value=False)),
         'secret_key': PasswordField('secret_key',
-            widget=PasswordInput(hide_value=False))
+                                    widget=PasswordInput(hide_value=False))
     }
     form_args = dict(
         name=dict(validators=[require_slug])
