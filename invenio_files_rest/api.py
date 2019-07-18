@@ -27,19 +27,26 @@ def send_alert_mail(threshold_rate, name, use_rate, used_size, use_limit):
     """Send storage use rate alert mail."""
     try:
         # mail title
-        subject = _('storage use rate over ') + str(threshold_rate) + '%'
+        subject = '[{0}] '.format(current_app.config['THEME_SITENAME']) + \
+            _('Storage usage report')
         # recipient mail list
         users = []
         users += get_user_info_by_role_name('Repository Administrator')
         mail_list = []
         for user in users:
             mail_list.append(user.email)
-        # send alert mail
-        send_mail(subject, mail_list,
-                  html=render_template('admin/alert_mail.html',
-                                       location_name=name,
-                                       use_rate=use_rate,
-                                       used_size=used_size,
-                                       use_limit=use_limit))
+
+        with current_app.test_request_context() as ctx:
+            lang_code = current_app.config['BABEL_DEFAULT_LANGUAGE']
+            # setting locale
+            setattr(ctx, 'babel_locale', lang_code)
+            # send alert mail
+            send_mail(subject, mail_list,
+                      html=render_template('admin/alert_mail.html',
+                                           location_name=name,
+                                           use_rate=use_rate,
+                                           used_size=used_size,
+                                           use_limit=use_limit,
+                                           lang_code=lang_code))
     except Exception as ex:
         current_app.logger.error(ex)
