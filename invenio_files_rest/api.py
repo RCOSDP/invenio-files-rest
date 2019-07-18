@@ -19,6 +19,7 @@ from flask import current_app, render_template
 from flask_babelex import gettext as _
 from invenio_mail.api import send_mail
 from weko_accounts.api import get_user_info_by_role_name
+from weko_admin.models import AdminLangSettings
 
 from .models import Location
 
@@ -37,9 +38,9 @@ def send_alert_mail(threshold_rate, name, use_rate, used_size, use_limit):
             mail_list.append(user.email)
 
         with current_app.test_request_context() as ctx:
-            lang_code = current_app.config['BABEL_DEFAULT_LANGUAGE']
+            default_lang = AdminLangSettings.get_registered_language()[0]
             # setting locale
-            setattr(ctx, 'babel_locale', lang_code)
+            setattr(ctx, 'babel_locale', default_lang['lang_code'])
             # send alert mail
             send_mail(subject, mail_list,
                       html=render_template('admin/alert_mail.html',
@@ -47,6 +48,6 @@ def send_alert_mail(threshold_rate, name, use_rate, used_size, use_limit):
                                            use_rate=use_rate,
                                            used_size=used_size,
                                            use_limit=use_limit,
-                                           lang_code=lang_code))
+                                           lang_code=default_lang['lang_code']))
     except Exception as ex:
         current_app.logger.error(ex)
