@@ -53,6 +53,7 @@ model.
 from __future__ import absolute_import, print_function
 
 import mimetypes
+import os
 import re
 import uuid
 from datetime import datetime
@@ -63,11 +64,13 @@ import six
 from flask import current_app
 from flask_login import current_user
 from invenio_db import db
+from invenio_previewer.api import convert_to
 from sqlalchemy.dialects import mysql, postgresql
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import validates
 from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy_utils.types import JSONType, UUIDType
+from weko_admin.models import AdminSettings
 
 from .errors import BucketLockedError, FileInstanceAlreadySetError, \
     FileInstanceUnreadableError, FileSizeError, InvalidKeyError, \
@@ -825,8 +828,31 @@ class FileInstance(db.Model, Timestamp):
     @ensure_readable()
     def send_file(self, filename, restricted=True, mimetype=None,
                   trusted=False, chunk_size=None, as_attachment=False,
-                  **kwargs):
+                  convert_to_pdf=False, **kwargs):
         """Send file to client."""
+        # Convert ms office file to PDF for preview
+        if convert_to_pdf:
+            try:
+                settings = AdminSettings.get('convert_pdf_settings')
+                # Load settings from settings if there is not settings in db
+                if settings:
+                    path = settings.path
+                else:
+                    path = current_app.config.get('FILES_REST_DEFAULT_PDF_SAVE_PATH', '/var/tmp')
+                pdf_dir = path + '/pdf_dir/' + str(self.id)
+                pdf_filename = '/data.pdf'
+                file_type = os.path.splitext(self.json['filename'])[1].lower()
+                # Change preview file to pdf
+                self.json['mimetype'] = 'application/pdf'
+                self.json['filename'] = \
+                    self.json['filename'].replace(file_type, '.pdf')
+                if not os.path.isfile(pdf_dir + pdf_filename):
+                    convert_to(pdf_dir, self.uri)
+                self.uri = pdf_dir + pdf_filename
+                self.size = os.path.getsize(pdf_dir + pdf_filename)
+            except Exception as ex:
+                current_app.logger.error('convert to pdf error')
+                current_app.logger.error(ex)
         return self.storage(**kwargs).send_file(
             filename,
             mimetype=mimetype,
@@ -1045,13 +1071,15 @@ class ObjectVersion(db.Model, Timestamp):
         self.file = fileinstance
         return self
 
-    def send_file(self, restricted=True, trusted=False, **kwargs):
+    def send_file(self, restricted=True, trusted=False,
+                  convert_to_pdf=False, **kwargs):
         """Wrap around FileInstance's send file."""
         return self.file.send_file(
             self.basename,
             restricted=restricted,
             mimetype=self.mimetype,
             trusted=trusted,
+            convert_to_pdf=convert_to_pdf,
             **kwargs
         )
 

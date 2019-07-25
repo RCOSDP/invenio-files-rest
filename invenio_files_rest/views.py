@@ -596,7 +596,8 @@ class ObjectResource(ContentNegotiatedMethodView):
             logger_data=None,
             restricted=True,
             as_attachment=False,
-            is_preview=False):
+            is_preview=False,
+            convert_to_pdf=False):
         """Send an object for a given bucket.
 
         :param is_preview: Determine the type of event. True: file-preview, False: file-download
@@ -605,6 +606,7 @@ class ObjectResource(ContentNegotiatedMethodView):
             instance.
         :params expected_chksum: Expected checksum.
         :param logger_data: The python logger.
+        :param convert_to_pdf: Preview file convert to PDF flag.
         :param kwargs: Keyword arguments passed to ``Object.send_file()``
         :returns: A Flask response.
         """
@@ -623,7 +625,8 @@ class ObjectResource(ContentNegotiatedMethodView):
         else:
             file_downloaded.send(current_app._get_current_object(), obj=obj)
         return obj.send_file(restricted=restricted,
-                             as_attachment=as_attachment)
+                             as_attachment=as_attachment,
+                             convert_to_pdf=convert_to_pdf)
 
     #
     # MultipartObject helpers

@@ -26,7 +26,9 @@
 
 from __future__ import absolute_import, print_function
 
+import glob
 import math
+import os
 import uuid
 from datetime import date, datetime, timedelta
 
@@ -42,6 +44,7 @@ from weko_admin.models import AdminSettings
 
 from .api import send_alert_mail
 from .models import FileInstance, Location, MultipartObject, ObjectVersion
+from .storage.pyfs import remove_dir_with_file
 from .utils import obj_or_import_string
 
 logger = get_task_logger(__name__)
@@ -291,7 +294,7 @@ def check_send_alert_mail():
     settings = AdminSettings.get('storage_check_settings')
 
     if settings:
-        now = datetime.now()
+        now = datetime.utcnow()
         locations = Location.all()
         for l in locations:
             if l.quota_size and l.quota_size > 0 \
@@ -304,3 +307,23 @@ def check_send_alert_mail():
                     send_alert_mail(settings.threshold_rate, l.name,
                                     l.size / l.quota_size,
                                     l.size, l.quota_size)
+
+
+@shared_task(ignore_result=True)
+def check_file_storage_time():
+    """Check the storage time of the ms office preview file."""
+    settings = AdminSettings.get('convert_pdf_settings')
+
+    if settings:
+        path = settings.path
+        ttl = settings.pdf_ttl
+    else:
+        path = current_app.config.get('FILES_REST_DEFAULT_PDF_SAVE_PATH',
+                                      '/var/tmp')
+        ttl = current_app.config.get('FILES_REST_DEFAULT_PDF_TTL', 1 * 60 * 60)
+    # Delete file if file creation time exceeded TTL
+    now = datetime.utcnow()
+    for d in glob.glob(path + "/pdf_dir/**"):
+        tLog = os.path.getmtime(d)
+        if (now - datetime.utcfromtimestamp(tLog)).total_seconds() >= ttl:
+            remove_dir_with_file(d)

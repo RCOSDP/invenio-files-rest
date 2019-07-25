@@ -28,6 +28,7 @@ from __future__ import absolute_import, print_function
 
 import base64
 import hashlib
+import shutil
 
 import cchardet as chardet
 from flask import current_app
@@ -241,3 +242,11 @@ def pyfs_storage_factory(fileinstance=None, default_location=None,
 
     return filestorage_class(
         fileurl, size=size, modified=modified, clean_dir=clean_dir)
+
+
+def remove_dir_with_file(path):
+    """Remove the directory that contains the all files in the directory."""
+    try:
+        shutil.rmtree(path)
+    except OSError as e:
+        current_app.logger.error(e)
