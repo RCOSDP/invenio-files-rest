@@ -29,9 +29,11 @@ from __future__ import absolute_import, print_function
 import uuid
 from functools import partial, wraps
 
-from flask import Blueprint, abort, current_app, request
+from flask import Blueprint, abort, current_app, jsonify, request
 from flask_login import current_user
 from invenio_db import db
+from invenio_records.models import RecordMetadata
+from invenio_records_files.models import RecordsBuckets
 from invenio_rest import ContentNegotiatedMethodView
 from marshmallow import missing
 from webargs import fields
@@ -39,7 +41,7 @@ from webargs.flaskparser import use_kwargs
 
 from .errors import FileSizeError, MissingQueryParameter, \
     MultipartInvalidChunkSize
-from .models import Bucket, MultipartObject, ObjectVersion, Part
+from .models import Bucket, Location, MultipartObject, ObjectVersion, Part
 from .proxies import current_files_rest, current_permission_factory
 from .serializer import json_serializer
 from .signals import file_downloaded, file_previewed
@@ -60,6 +62,13 @@ admin_blueprint = Blueprint(
     static_folder='static',
 )
 
+api_blueprint = Blueprint(
+    'invenio_files_rest_api',
+    __name__,
+    url_prefix='/adm',
+    template_folder='templates',
+    static_folder='static',
+)
 #
 # Helpers
 #
@@ -600,7 +609,8 @@ class ObjectResource(ContentNegotiatedMethodView):
             convert_to_pdf=False):
         """Send an object for a given bucket.
 
-        :param is_preview: Determine the type of event. True: file-preview, False: file-download
+        :param is_preview: Determine the type of event.
+            True: file-preview, False: file-download
         :param bucket: The bucket (instance or id) to get the object from.
         :param obj: A :class:`invenio_files_rest.models.ObjectVersion`
             instance.
@@ -845,6 +855,41 @@ class ObjectResource(ContentNegotiatedMethodView):
             return self.delete_object(bucket, obj, version_id)
 
 
+class LocationUsageAmountInfo(ContentNegotiatedMethodView):
+    """REST API resource providing location usage amount."""
+
+    def __init__(self, *args, **kwargs):
+        """Instatiate content negotiated view."""
+        super(LocationUsageAmountInfo, self).__init__(*args, **kwargs)
+
+    def get(self, **kwargs):
+        """Get location usage amount."""
+        result = []
+
+        locations = Location.query.order_by(Location.name.asc()).all()
+        for l in locations:
+            data = {}
+            data['name'] = l.name
+            data['default'] = l.default
+            data['size'] = l.size
+            data['quota_size'] = l.quota_size
+            # number of registered files
+            buckets = Bucket.query.with_entities(
+                Bucket.id).filter_by(location=l)
+            data['files'] = ObjectVersion.query.filter(
+                ObjectVersion.bucket_id.in_(buckets.subquery())).count()
+            # number of registered items
+            records_buckets = RecordsBuckets.query.with_entities(
+                RecordsBuckets.record_id).filter(
+                    RecordsBuckets.bucket_id.in_(buckets.subquery()))
+            data['items'] = RecordMetadata.query.filter(
+                RecordMetadata.id.in_(records_buckets.subquery())).count()
+
+            result.append(data)
+
+        return jsonify(result)
+
+
 def _location_has_quota(bucket, content_length):
     quota = bucket.location.quota_size
     if not quota:
@@ -879,6 +924,12 @@ object_view = ObjectResource.as_view(
         'application/json': json_serializer,
     }
 )
+location_usage_amount = LocationUsageAmountInfo.as_view(
+    'location_usage_amount_info',
+    serializers={
+        'application/json': json_serializer,
+    }
+)
 
 blueprint.add_url_rule(
     '',
@@ -891,4 +942,8 @@ blueprint.add_url_rule(
 blueprint.add_url_rule(
     '/<string:bucket_id>/<path:key>',
     view_func=object_view,
+)
+api_blueprint.add_url_rule(
+    '/locations',
+    view_func=location_usage_amount,
 )
