@@ -878,12 +878,6 @@ class LocationUsageAmountInfo(ContentNegotiatedMethodView):
                 Bucket.id).filter_by(location=l)
             data['files'] = ObjectVersion.query.filter(
                 ObjectVersion.bucket_id.in_(buckets.subquery())).count()
-            # number of registered items
-            records_buckets = RecordsBuckets.query.with_entities(
-                RecordsBuckets.record_id).filter(
-                    RecordsBuckets.bucket_id.in_(buckets.subquery()))
-            data['items'] = RecordMetadata.query.filter(
-                RecordMetadata.id.in_(records_buckets.subquery())).count()
 
             result.append(data)
 
