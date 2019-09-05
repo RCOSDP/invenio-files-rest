@@ -981,6 +981,10 @@ class ObjectVersion(db.Model, Timestamp):
                         nullable=False,
                         default=False)
 
+    is_thumbnail = db.Column(db.Boolean(name='is_thumbnail'),
+                        nullable=False,
+                        default=False)
+
     @validates('key')
     def validate_key(self, key, key_):
         """Validate key."""
