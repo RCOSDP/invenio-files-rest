@@ -984,6 +984,7 @@ class ObjectVersion(db.Model, Timestamp):
     is_thumbnail = db.Column(db.Boolean(name='is_thumbnail'),
                         nullable=False,
                         default=False)
+    """Defines if object is the thumbnail."""
 
     @validates('key')
     def validate_key(self, key, key_):
@@ -1150,7 +1151,7 @@ class ObjectVersion(db.Model, Timestamp):
 
     @classmethod
     def create(cls, bucket, key, _file_id=None, stream=None, mimetype=None,
-               version_id=None, **kwargs):
+               version_id=None, is_thumbnail=False, **kwargs):
         """Create a new object in a bucket.
 
         The created object is by default created as a delete marker. You must
@@ -1162,6 +1163,7 @@ class ObjectVersion(db.Model, Timestamp):
         :param stream: File-like stream object. Used to set content of object
             immediately after being created.
         :param mimetype: MIME type of the file object if it is known.
+        :param is_thumbnail: for thumbnail.
         :param kwargs: Keyword arguments passed to ``Object.set_contents()``.
         """
         bucket = as_bucket(bucket)
@@ -1195,6 +1197,7 @@ class ObjectVersion(db.Model, Timestamp):
                 created_user_id=login_user_id,
                 updated_user_id=login_user_id,
                 is_show=False,
+                is_thumbnail=is_thumbnail,
             )
             if _file_id:
                 file_ = _file_id if isinstance(_file_id, FileInstance) else \

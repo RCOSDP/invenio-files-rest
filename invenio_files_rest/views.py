@@ -524,11 +524,12 @@ class ObjectResource(ContentNegotiatedMethodView):
 
         return obj
 
-    def create_object(self, bucket, key):
+    def create_object(self, bucket, key, is_thumbnail):
         """Create a new object.
 
         :param bucket: The bucket (instance or id) to get the object from.
         :param key: The file key.
+        :param is_thumbnail: for thumbnail.
         :returns: A Flask response.
         """
         # Initial validation of size based on Content-Length.
@@ -552,7 +553,7 @@ class ObjectResource(ContentNegotiatedMethodView):
             current_app.logger.error(desc)
             raise FileSizeError(description=desc)
         with db.session.begin_nested():
-            obj = ObjectVersion.create(bucket, key)
+            obj = ObjectVersion.create(bucket, key, is_thumbnail=is_thumbnail)
             obj.set_contents(
                 stream, size=content_length, size_limit=size_limit)
         db.session.commit()
@@ -821,19 +822,21 @@ class ObjectResource(ContentNegotiatedMethodView):
     @use_kwargs(put_args)
     @pass_bucket
     @need_bucket_permission('bucket-update')
-    def put(self, bucket=None, key=None, upload_id=None):
+    def put(self, bucket=None, key=None, is_thumbnail=None, upload_id=None):
         """Update a new object or upload a part of a multipart upload.
 
         :param bucket: The bucket (instance or id) to get the object from.
             (Default: ``None``)
         :param key: The file key. (Default: ``None``)
+        :param is_thumbnail: for thumbnail.
         :param upload_id: The upload ID. (Default: ``None``)
         :returns: A Flask response.
         """
         if upload_id is not None:
             return self.multipart_uploadpart(bucket, key, upload_id)
         else:
-            return self.create_object(bucket, key)
+            is_thumbnail = True if is_thumbnail is not None else False
+            return self.create_object(bucket, key, is_thumbnail=is_thumbnail)
 
     @use_kwargs(delete_args)
     @pass_bucket
@@ -918,6 +921,12 @@ object_view = ObjectResource.as_view(
         'application/json': json_serializer,
     }
 )
+object_thumbnail_view = ObjectResource.as_view(
+    'object_thumbnail_api',
+    serializers={
+        'application/json': json_serializer,
+    }
+)
 location_usage_amount = LocationUsageAmountInfo.as_view(
     'location_usage_amount_info',
     serializers={
@@ -936,6 +945,10 @@ blueprint.add_url_rule(
 blueprint.add_url_rule(
     '/<string:bucket_id>/<path:key>',
     view_func=object_view,
+)
+blueprint.add_url_rule(
+    '/<string:is_thumbnail>/<string:bucket_id>/<path:key>',
+    view_func=object_thumbnail_view,
 )
 api_blueprint.add_url_rule(
     '/locations',
