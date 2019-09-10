@@ -442,7 +442,7 @@ class Bucket(db.Model, Timestamp):
             db.session.add(b)
 
         for o in ObjectVersion.get_by_bucket(self):
-            o.copy(bucket=b)
+            o.copy(bucket=b, is_thumbnail=o.is_thumbnail)
 
         b.locked = True if lock else self.locked
 
@@ -1099,7 +1099,7 @@ class ObjectVersion(db.Model, Timestamp):
 
     @ensure_not_deleted(
         msg=[ObjectVersionError('Cannot copy a delete marker.')])
-    def copy(self, bucket=None, key=None):
+    def copy(self, bucket=None, key=None, is_thumbnail=False):
         """Copy an object version to a given bucket + object key.
 
         The copy operation is handled completely at the metadata level. The
@@ -1115,12 +1115,15 @@ class ObjectVersion(db.Model, Timestamp):
             Default: current bucket.
         :param key: Key name of destination object.
             Default: current object key.
+        :param is_thumbnail: for thumbnail.
+            Default: False.
         :returns: The copied object version.
         """
         return ObjectVersion.create(
             self.bucket if bucket is None else as_bucket(bucket),
             key or self.key,
-            _file_id=self.file_id
+            _file_id=self.file_id,
+            is_thumbnail=is_thumbnail
         )
 
     @ensure_unlocked(getter=lambda o: not o.bucket.locked)
