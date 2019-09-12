@@ -838,7 +838,8 @@ class FileInstance(db.Model, Timestamp):
                 if settings:
                     path = settings.path
                 else:
-                    path = current_app.config.get('FILES_REST_DEFAULT_PDF_SAVE_PATH', '/var/tmp')
+                    path = current_app.config.get(
+                        'FILES_REST_DEFAULT_PDF_SAVE_PATH', '/var/tmp')
                 pdf_dir = path + '/pdf_dir/' + str(self.id)
                 pdf_filename = '/data.pdf'
                 file_type = os.path.splitext(self.json['filename'])[1].lower()
@@ -982,8 +983,8 @@ class ObjectVersion(db.Model, Timestamp):
                         default=False)
 
     is_thumbnail = db.Column(db.Boolean(name='is_thumbnail'),
-                        nullable=False,
-                        default=False)
+                             nullable=False,
+                             default=False)
     """Defines if object is the thumbnail."""
 
     @validates('key')
