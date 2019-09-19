@@ -1181,7 +1181,7 @@ class ObjectVersion(db.Model, Timestamp):
             ).one_or_none()
 
             login_user_id = 0
-            if current_user.is_authenticated:
+            if current_user and current_user.is_authenticated:
                 login_user_id = current_user.get_id()
 
             if latest_obj is not None:
