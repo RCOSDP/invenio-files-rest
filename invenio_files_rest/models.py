@@ -1041,7 +1041,6 @@ class ObjectVersion(db.Model, Timestamp):
         db.UniqueConstraint('bucket_id', 'version_id', 'key'),
     )
 
-
     @validates('key')
     def validate_key(self, key, key_):
         """Validate key."""

@@ -9,7 +9,9 @@
 """Permissions for files using Invenio-Access."""
 import os
 from functools import partial
+
 from invenio_access import Permission, action_factory
+
 from .models import Bucket, MultipartObject, ObjectVersion
 
 #
