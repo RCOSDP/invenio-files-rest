@@ -311,3 +311,15 @@ def check_file_storage_time():
         tLog = os.path.getmtime(d)
         if (now - datetime.utcfromtimestamp(tLog)).total_seconds() >= ttl:
             remove_dir_with_file(d)
+
+
+@shared_task(ignore_result=True)
+def check_location_size():
+    """Check the storage time of the ms office preview file."""
+    current_app.logger.debug("""Check the storage time of the ms office preview file.""")
+    location = Location.get_default()
+    all_files_size = db.session.query(
+        sa.func.sum(FileInstance.size)).scalar()
+
+    location.size = all_files_size
+    db.session.commit()

@@ -134,7 +134,7 @@ def update_bucket_size(f):
     def inner(self, *args, **kwargs):
         res = f(self, *args, **kwargs)
         self.bucket.size += self.file.size
-        self.bucket.location.size += self.file.size
+        # self.bucket.location.size += self.file.size
         return res
     return inner
 
