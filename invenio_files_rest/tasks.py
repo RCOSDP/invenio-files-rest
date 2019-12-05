@@ -316,20 +316,19 @@ def check_file_storage_time():
 @shared_task(ignore_result=True)
 def check_location_size():
     """Set default location size by total FileInstances size."""
-    locations = Location.all()
-    files = FileInstance.query.all()
 
     try:
-        for l in locations:
-            all_file_size = 0
-            for file in files:
-                file_uri = get_file_location(file)
-                if l.uri == file_uri:
-                    all_file_size += file.size
+        with db.session.begin_nested():
+            locations = Location.all()
+            files = FileInstance.query.all()
+            for l in locations:
+                all_file_size = 0
+                for file in files:
+                    file_uri = get_file_location(file)
+                    if l.uri == file_uri:
+                        all_file_size += file.size
 
-            l.size = all_file_size
-
+                l.size = all_file_size
         db.session.commit()
     except Exception:
-        db.session.rollback()
         raise
