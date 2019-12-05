@@ -315,8 +315,7 @@ def check_file_storage_time():
 
 @shared_task(ignore_result=True)
 def check_location_size():
-    """Check the storage time of the ms office preview file."""
-    current_app.logger.debug("""Check the storage time of the ms office preview file.""")
+    """Set default location size by total FileInstances size."""
     location = Location.get_default()
     all_files_size = db.session.query(
         sa.func.sum(FileInstance.size)).scalar()
