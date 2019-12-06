@@ -29,7 +29,7 @@ from weko_admin.models import AdminSettings
 from .api import send_alert_mail
 from .models import FileInstance, Location, MultipartObject, ObjectVersion
 from .storage.pyfs import remove_dir_with_file
-from .utils import obj_or_import_string, get_file_location
+from .utils import obj_or_import_string
 
 logger = get_task_logger(__name__)
 
@@ -317,8 +317,15 @@ def check_file_storage_time():
 def check_location_size():
     """Set default location size by total FileInstances size."""
     location = Location.get_default()
-    all_files_size = db.session.query(
-        sa.func.sum(FileInstance.size)).scalar()
+    files = FileInstance.query.all()
 
-    location.size = all_files_size
+    for loc in locations:
+        all_files_size = 0
+
+        for f in files:
+            if loc.uri in str(f.uri):
+                all_files_size += f.size
+
+        loc.size = all_files_size
+
     db.session.commit()

@@ -56,17 +56,3 @@ def guess_mimetype(filename):
     if encoding:
         m = ENCODING_MIMETYPES.get(encoding, None)
     return m or 'application/octet-stream'
-
-
-def get_file_location(file_object):
-    """Get location uri base on file id.
-
-    :params file_object: File Object.
-    :returns: Correctponding Location uri.
-    """
-    file_ = str(file_object.id)
-
-    uri_id = '/' + f_id[:2] + '/' + f_id[2:4] + '/' + f_id[4:] + '/data'
-    location = str(file_object.uri).replace(uri_id, '')
-
-    return location
