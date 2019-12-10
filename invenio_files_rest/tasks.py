@@ -323,7 +323,7 @@ def check_location_size():
         all_files_size = 0
 
         for f in files:
-            if loc.uri in str(f.uri):
+            if loc.uri + '/' in str(f.uri):
                 all_files_size += f.size
 
         loc.size = all_files_size
