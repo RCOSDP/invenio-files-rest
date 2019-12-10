@@ -316,7 +316,7 @@ def check_file_storage_time():
 @shared_task(ignore_result=True)
 def check_location_size():
     """Set default location size by total FileInstances size."""
-    location = Location.get_default()
+    locations = Location.all()
     files = FileInstance.query.all()
 
     for loc in locations:
